@@ -34,7 +34,6 @@ describe('MenuItemsController', () => {
       .expect(200);
 
     const result = response.body;
-
     expect(result.length).toBe(1);
     expect(result[0].children[0].name).toBe('Laracon');
     expect(result[0].children[0].children[0].url).toBe(

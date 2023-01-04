@@ -86,6 +86,37 @@ export class MenuItemsService {
     ]
   */
   async getMenuItems() {
-    throw new Error('TODO in task 3');
+    const menuItems = await this.menuItemRepository.find({
+      relations: ['children'],
+    });
+
+    const buildMenuTree = (menuItems: MenuItem[]): MenuItem[] => {
+      const menuTree: MenuItem[] = [];
+      const childrenMap: { [key: number]: MenuItem[] } = {};
+
+      for (const menuItem of menuItems) {
+        if (menuItem.parentId) {
+          if (childrenMap[menuItem.parentId]) {
+            childrenMap[menuItem.parentId].push(menuItem);
+          } else {
+            childrenMap[menuItem.parentId] = [menuItem];
+          }
+        } else {
+          menuTree.push(menuItem);
+        }
+      }
+
+      for (const menuItem of menuTree) {
+        menuItem.children = childrenMap[menuItem.id] || [];
+        if (menuItem.children.length > 0) {
+          buildMenuTree(menuItem.children);
+        }
+      }
+
+      return menuTree;
+    };
+
+
+    return buildMenuTree(menuItems);
   }
 }
