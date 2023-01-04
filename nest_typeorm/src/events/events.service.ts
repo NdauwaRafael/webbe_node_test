@@ -1,7 +1,7 @@
-import { Repository } from 'typeorm';
-import { Get, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Event } from './entities/event.entity';
+import {Repository} from 'typeorm';
+import {Get, Injectable} from '@nestjs/common';
+import {InjectRepository} from '@nestjs/typeorm';
+import {Event} from './entities/event.entity';
 
 @Injectable()
 export class EventsService {
@@ -93,7 +93,14 @@ export class EventsService {
 
   @Get('events')
   async getEventsWithWorkshops() {
-    throw new Error('TODO task 1');
+    return await this.eventRepository.find({
+      relations: ['workshops'],
+      order: {
+        workshops: {
+          id: 'ASC'
+        },
+      },
+    });
   }
 
   /* TODO: complete getFutureEventWithWorkshops so that it returns events with workshops, that have not yet started
@@ -164,6 +171,10 @@ export class EventsService {
      */
   @Get('futureevents')
   async getFutureEventWithWorkshops() {
-    throw new Error('TODO task 2');
+    return await this.eventRepository
+        .createQueryBuilder('event')
+        .innerJoin('event.workshops', 'workshop')
+        .where('workshop.start = (SELECT MIN(start) FROM workshop WHERE event.id = workshop.eventId)')
+        .getMany();
   }
 }
